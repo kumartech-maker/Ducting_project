@@ -1,5 +1,6 @@
 from flask import Flask
 from .models import db
+from .routes.dashboard import dashboard_bp
 
 def create_app():
     app = Flask(__name__)
