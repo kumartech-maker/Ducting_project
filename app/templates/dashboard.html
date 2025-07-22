@@ -8,6 +8,7 @@
     body {
       display: flex;
       min-height: 100vh;
+      margin: 0;
     }
     .sidebar {
       width: 220px;
@@ -28,6 +29,9 @@
       flex: 1;
       padding: 20px;
     }
+    .alert {
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -37,7 +41,7 @@
     <h4>Ducting App</h4>
     <hr>
     <strong>Modules</strong>
-    <a href="#">New Project (Enquiry)</a>
+    <a href="{{ url_for('project.new_project') }}">New Project (Enquiry)</a>
     <a href="#">Progress</a>
     <a href="#">Summary</a>
 
