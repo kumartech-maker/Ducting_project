@@ -30,7 +30,6 @@ def new_project():
         notes = request.form['notes']
         contact = request.form.get('contact')
         email = request.form.get('email')
-        location=project_location  # ✅ This is now correct
 
         diagram_file = request.files.get('source_diagram')
         filename = None
@@ -44,14 +43,14 @@ def new_project():
             quotation_no=quotation_no,
             start_date=start_date,
             end_date=end_date,
-            
+            location=location,
             vendor_id=vendor_id,
-            gst=gst,
+            gst_number=gst,
             address=address,
-            incharge=incharge,
+            project_incharge=incharge,
             notes=notes,
-            contact=contact,
-            email=email,
+            contact_number=contact,
+            mail_id=email,
             source_diagram=filename
         )
         db.session.add(project)
@@ -66,9 +65,6 @@ def new_project():
 # -------------------------------
 # Route: Seed Dummy Vendors (TEMP)
 # -------------------------------
-
-
-# ✅ Seed dummy vendors route
 @project_bp.route('/seed_vendors')
 def seed_vendors():
     if not Vendor.query.first():
