@@ -15,12 +15,12 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    # Register all blueprints
+    # ✅ Register all blueprints
     from .routes.auth import auth_bp
     from .routes.dashboard import dashboard_bp
     from .routes.project import project_bp
     from .routes.seed import seed_bp
-    from routes.measurement import measurement_bp
+    from .routes.measurement import measurement_bp  # ✅ FIXED
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
