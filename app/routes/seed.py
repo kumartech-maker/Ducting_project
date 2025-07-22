@@ -1,15 +1,17 @@
-# routes/seed.py
 from flask import Blueprint
-from ..models import db, Vendor
+from app.models import db, Vendor
 
 seed_bp = Blueprint('seed', __name__)
 
-@seed_bp.route('/seed_vendors')
-def seed_vendors():
-    if not Vendor.query.first():
-        v1 = Vendor(name="ABC Enterprises", gst_number="29ABCDE1234F2Z5", address="Chennai, TN")
-        v2 = Vendor(name="XYZ Solutions", gst_number="33XYZDE5678G1Z9", address="Coimbatore, TN")
-        db.session.add_all([v1, v2])
-        db.session.commit()
-        return "Dummy vendors added"
-    return "Vendors already exist"
+@seed_bp.route('/seed')
+def seed():
+    if Vendor.query.first():
+        return "Vendors already exist."
+
+    dummy_vendors = [
+        Vendor(name='ABC Corp', gst_no='29ABCDE1234F2Z5', address='Bangalore'),
+        Vendor(name='XYZ Ltd', gst_no='07XYZDE1234F1Z9', address='Delhi')
+    ]
+    db.session.bulk_save_objects(dummy_vendors)
+    db.session.commit()
+    return "Vendors seeded!"
