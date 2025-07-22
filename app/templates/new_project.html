@@ -7,6 +7,7 @@
 </head>
 <body class="p-4">
   <h2>New Project</h2>
+
   <form method="POST" enctype="multipart/form-data">
     <div class="row mb-3">
       <div class="col-md-4">
@@ -40,11 +41,11 @@
 
     <div class="row mb-3">
       <div class="col-md-4">
-        <label>Vendor</label>
-        <select name="vendor_id" id="vendor-select" class="form-control" required>
+        <label>Vendor Name</label>
+        <select name="vendor_id" id="vendor_id" class="form-control select2" required onchange="fillVendorDetails()">
           <option value="">-- Select Vendor --</option>
           {% for vendor in vendors %}
-            <option value="{{ vendor.id }}" data-gst="{{ vendor.gst }}" data-address="{{ vendor.address }}">
+            <option value="{{ vendor.id }}" data-gst="{{ vendor.gst_number }}" data-address="{{ vendor.address }}">
               {{ vendor.name }}
             </option>
           {% endfor %}
@@ -120,17 +121,19 @@
     </tbody>
   </table>
 
+  <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
-    $('#vendor-select').select2();
-
-    $('#vendor-select').on('change', function () {
-      const gst = $(this).find(':selected').data('gst');
-      const address = $(this).find(':selected').data('address');
-      $('#gst').val(gst);
-      $('#address').val(address);
+    $(document).ready(function () {
+      $('.select2').select2();
     });
+
+    function fillVendorDetails() {
+      const selected = document.querySelector('#vendor_id').selectedOptions[0];
+      document.getElementById('gst').value = selected.getAttribute('data-gst') || '';
+      document.getElementById('address').value = selected.getAttribute('data-address') || '';
+    }
   </script>
 </body>
 </html>
