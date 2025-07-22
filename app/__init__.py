@@ -14,10 +14,12 @@ def create_app():
     # Register all blueprints
     from .routes.auth import auth_bp
     from .routes.dashboard import dashboard_bp
-    from .routes.project import project_bp   # ✅ Add this line
+    from .routes.project import project_bp
+    from .routes.seed import seed_bp   # ✅ Added for dummy vendors
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
-    app.register_blueprint(project_bp)       # ✅ And this line
+    app.register_blueprint(project_bp)
+    app.register_blueprint(seed_bp)   # ✅ Register seed route
 
     return app
