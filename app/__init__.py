@@ -1,6 +1,5 @@
 from flask import Flask
 from .models import db
-from .routes.dashboard import dashboard_bp
 
 def create_app():
     app = Flask(__name__)
@@ -12,10 +11,13 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    # Register all blueprints
     from .routes.auth import auth_bp
     from .routes.dashboard import dashboard_bp
+    from .routes.project import project_bp   # ✅ Add this line
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(project_bp)       # ✅ And this line
 
     return app
