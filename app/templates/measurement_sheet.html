@@ -178,5 +178,77 @@
       if (file) reader.readAsDataURL(file);
     });
   </script>
+  <script>
+  function addDuctEntry() {
+    const ductNo = document.getElementById("duct_no").value;
+    const ductType = document.getElementById("duct_type").value;
+    const w1 = parseFloat(document.getElementById("w1").value) || 0;
+    const h1 = parseFloat(document.getElementById("h1").value) || 0;
+    const w2 = parseFloat(document.getElementById("w2").value) || 0;
+    const h2 = parseFloat(document.getElementById("h2").value) || 0;
+    const length = parseFloat(document.getElementById("length").value) || 0;
+    const degree = document.getElementById("degree").value;
+    const quantity = parseInt(document.getElementById("quantity").value) || 1;
+    const factor = parseFloat(document.getElementById("factor").value) || 1;
+
+    if (!ductNo || !ductType || !w1 || !h1 || !quantity) {
+      alert("Please fill all required fields!");
+      return;
+    }
+
+    // Basic gauge logic (update this logic if needed)
+    let gauge = "24g";
+    if (w1 > 750 || h1 > 750) gauge = "22g";
+    if (w1 > 1200 || h1 > 1200) gauge = "20g";
+    if (w1 > 1800 || h1 > 1800) gauge = "18g";
+
+    // Area formula (simplified, update later as per your logic)
+    const area = ((w1 + h1 + w2 + h2) / 2) * length * quantity * factor / 1000000;
+
+    // Gauge columns
+    let g24 = "", g22 = "", g20 = "", g18 = "";
+    if (gauge === "24g") g24 = area.toFixed(2);
+    else if (gauge === "22g") g22 = area.toFixed(2);
+    else if (gauge === "20g") g20 = area.toFixed(2);
+    else if (gauge === "18g") g18 = area.toFixed(2);
+
+    // Materials
+    const cleat = (area * 0.25).toFixed(2);
+    const nuts = Math.ceil(area * 0.1);
+    const gasket = (area * 0.05).toFixed(2);
+    const corner = Math.ceil(quantity * 4);
+
+    // Add row to table
+    const tableBody = document.getElementById("tableBody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${ductNo}</td>
+      <td>${w1}</td>
+      <td>${h1}</td>
+      <td>${w2}</td>
+      <td>${h2}</td>
+      <td>${length}</td>
+      <td>${degree}</td>
+      <td>${quantity}</td>
+      <td>${gauge}</td>
+      <td>${g24}</td>
+      <td>${g22}</td>
+      <td>${g20}</td>
+      <td>${g18}</td>
+      <td>${cleat}</td>
+      <td>${nuts}</td>
+      <td>${gasket}</td>
+      <td>${corner}</td>
+      <td>
+        <button class="btn btn-sm btn-warning">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+
+    // Reset the form
+    document.getElementById("duct-entry-form").reset();
+  }
+  </script>
 </body>
 </html>
