@@ -44,7 +44,9 @@ class Project(db.Model):
     contact_number = db.Column(db.String(20), nullable=True)
     mail_id = db.Column(db.String(100), nullable=True)
 
-
+# --------------------------
+# Measurement Model
+# --------------------------
 class Measurement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duct_no = db.Column(db.String(50), nullable=False)
@@ -57,10 +59,17 @@ class Measurement(db.Model):
     degree = db.Column(db.String(20), nullable=True)
     quantity = db.Column(db.Integer, nullable=False)
     factor = db.Column(db.Float, nullable=True)
+
     gauge = db.Column(db.String(10), nullable=False)
     area = db.Column(db.Float, nullable=False)
     g24 = db.Column(db.Float, default=0)
     g22 = db.Column(db.Float, default=0)
     g20 = db.Column(db.Float, default=0)
     g18 = db.Column(db.Float, default=0)
+
+    nuts_bolts = db.Column(db.Integer, default=0)
+    cleat = db.Column(db.Integer, default=0)
+    gasket = db.Column(db.Float, default=0.0)
+    corner = db.Column(db.Integer, default=0)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
