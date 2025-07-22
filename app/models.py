@@ -28,8 +28,12 @@ class Project(db.Model):
     mail_id = db.Column(db.String(100), nullable=True)
 
 # Vendor Model
-class Vendor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    gst_number = db.Column(db.String(20), nullable=False)
-    address = db.Column(db.String(200), nullable=False)
+@project_bp.route('/seed_vendors')
+def seed_vendors():
+    if not Vendor.query.first():
+        v1 = Vendor(name="ABC Enterprises", gst_number="29ABCDE1234F2Z5", address="Chennai, TN")
+        v2 = Vendor(name="XYZ Solutions", gst_number="33XYZDE5678G1Z9", address="Coimbatore, TN")
+        db.session.add_all([v1, v2])
+        db.session.commit()
+        return "Dummy vendors added"
+    return "Vendors already exist"
