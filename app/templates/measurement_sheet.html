@@ -53,57 +53,68 @@
         </div>
       </div>
 
-      <!-- Right Side: Form + Table -->
-      <div class="col-md-8">
-        <div class="form-section">
-          <h5>Add Duct Entry</h5>
-          <form id="ductForm" class="right-form" method="POST" action="/add-entry">
-            <div class="row">
-              <div class="col">
-                <input type="text" name="duct_no" class="form-control" placeholder="Duct No" required />
-              </div>
-              <div class="col">
-                <select name="duct_type" class="form-control" required>
-                  <option value="">Select Type</option>
-                  <option value="ST">ST</option>
-                  <option value="ELB">ELB</option>
-                  <option value="RED">RED</option>
-                  <option value="DUM">DUM</option>
-                  <option value="OFFSET">OFFSET</option>
-                  <option value="SHOE">SHOE</option>
-                  <option value="VANES">VANES</option>
-                </select>
-              </div>
-              <div class="col">
-                <input type="number" name="width1" class="form-control" placeholder="W1 (mm)" required />
-              </div>
-              <div class="col">
-                <input type="number" name="height1" class="form-control" placeholder="H1 (mm)" required />
-              </div>
-              <div class="col">
-                <input type="number" name="width2" class="form-control" placeholder="W2 (mm)" />
-              </div>
-              <div class="col">
-                <input type="number" name="height2" class="form-control" placeholder="H2 (mm)" />
-              </div>
-              <div class="col">
-                <input type="number" name="length" class="form-control" placeholder="Length/Radius (mm)" />
-              </div>
-              <div class="col">
-                <input type="number" name="degree" class="form-control" placeholder="Degree/Offset" />
-              </div>
-              <div class="col">
-                <input type="number" name="quantity" class="form-control" placeholder="Qty" required />
-              </div>
-              <div class="col">
-                <input type="number" step="0.01" name="factor" class="form-control" placeholder="Factor (optional)" />
-              </div>
-              <div class="col">
-                <button type="submit" class="btn btn-success">Add Entry</button>
-              </div>
-            </div>
-          </form>
-        </div>
+      <form id="duct-entry-form">
+  <div class="row g-2 mb-2">
+    <div class="col">
+      <label for="duct_no" class="form-label">Duct No</label>
+      <input type="text" class="form-control" id="duct_no" placeholder="Enter Duct No">
+    </div>
+    <div class="col">
+      <label for="duct_type" class="form-label">Duct Type</label>
+      <select class="form-select" id="duct_type">
+        <option selected disabled>Choose Type</option>
+        <option value="st">Straight</option>
+        <option value="elb">Elbow</option>
+        <option value="red">Reducer</option>
+        <option value="dm">Dampers</option>
+        <option value="offset">Offset</option>
+        <option value="shoe">Shoe</option>
+        <option value="vanes">Vanes</option>
+      </select>
+    </div>
+    <div class="col">
+      <label for="w1" class="form-label">W1</label>
+      <input type="number" class="form-control" id="w1" placeholder="Width 1">
+    </div>
+    <div class="col">
+      <label for="h1" class="form-label">H1</label>
+      <input type="number" class="form-control" id="h1" placeholder="Height 1">
+    </div>
+  </div>
+
+  <div class="row g-2 mb-2">
+    <div class="col">
+      <label for="w2" class="form-label">W2</label>
+      <input type="number" class="form-control" id="w2" placeholder="Width 2">
+    </div>
+    <div class="col">
+      <label for="h2" class="form-label">H2</label>
+      <input type="number" class="form-control" id="h2" placeholder="Height 2">
+    </div>
+    <div class="col">
+      <label for="length" class="form-label">Length/Radius</label>
+      <input type="number" class="form-control" id="length" placeholder="Length or Radius">
+    </div>
+    <div class="col">
+      <label for="degree" class="form-label">Degree/Offset</label>
+      <input type="text" class="form-control" id="degree" placeholder="Degree/Offset">
+    </div>
+  </div>
+
+  <div class="row g-2 mb-3">
+    <div class="col">
+      <label for="quantity" class="form-label">Quantity</label>
+      <input type="number" class="form-control" id="quantity" placeholder="Qty">
+    </div>
+    <div class="col">
+      <label for="factor" class="form-label">Factor (Optional)</label>
+      <input type="number" step="0.01" class="form-control" id="factor" placeholder="Factor">
+    </div>
+    <div class="col d-flex align-items-end">
+      <button type="button" class="btn btn-success w-100" onclick="addDuctEntry()">Add Entry</button>
+    </div>
+  </div>
+      </form>
 
         <!-- Live Table -->
         <div class="table-section">
