@@ -114,7 +114,10 @@
         <td>
           <a href="#" class="btn btn-sm btn-info">Edit</a>
           <a href="#" class="btn btn-sm btn-danger">Delete</a>
-          <a href="#" class="btn btn-sm btn-success">Measurement Sheet</a>
+          <a href="{{ url_for('project.measurement_sheet', project_id=project.id) }}" class="btn btn-sm btn-primary">
+  Measurement Sheet
+</a>
+
         </td>
       </tr>
       {% endfor %}
