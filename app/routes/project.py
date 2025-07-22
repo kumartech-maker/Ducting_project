@@ -62,6 +62,13 @@ def new_project():
     enquiry_id = generate_enquiry_id()
     return render_template('new_project.html', vendors=vendors, enquiry_id=enquiry_id, projects=projects)
 
+
+@project_bp.route('/measurement_sheet/<int:project_id>')
+def measurement_sheet(project_id):
+    project = Project.query.get_or_404(project_id)
+    return render_template('measurement_sheet.html', project=project)
+
+
 # -------------------------------
 # Route: Seed Dummy Vendors (TEMP)
 # -------------------------------
