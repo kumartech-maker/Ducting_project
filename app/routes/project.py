@@ -1,0 +1,61 @@
+# routes/project.py
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import os
+from ..models import db, Project, Vendor
+
+project_bp = Blueprint('project', __name__)
+
+@project_bp.route('/new_project', methods=['GET', 'POST'])
+def new_project():
+    vendors = Vendor.query.all()
+
+    if request.method == 'POST':
+        enquiry_id = generate_enquiry_id()
+        quotation_no = request.form['quotation_no']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        location = request.form['project_location']
+        vendor_id = request.form['vendor_id']
+        gst = request.form['gst']
+        address = request.form['address']
+        incharge = request.form['incharge']
+        notes = request.form['notes']
+        contact = request.form.get('contact')
+        email = request.form.get('email')
+
+        diagram_file = request.files.get('source_diagram')
+        filename = None
+        if diagram_file:
+            filename = secure_filename(diagram_file.filename)
+            diagram_file.save(os.path.join('uploads/', filename))
+
+        project = Project(
+            enquiry_id=enquiry_id,
+            quotation_no=quotation_no,
+            start_date=start_date,
+            end_date=end_date,
+            project_location=location,
+            vendor_id=vendor_id,
+            gst=gst,
+            address=address,
+            incharge=incharge,
+            notes=notes,
+            contact=contact,
+            email=email,
+            source_diagram=filename
+        )
+        db.session.add(project)
+        db.session.commit()
+        flash('Project saved successfully')
+        return redirect(url_for('project.new_project'))
+
+    projects = Project.query.all()
+    enquiry_id = generate_enquiry_id()
+    return render_template('new_project.html', vendors=vendors, enquiry_id=enquiry_id, projects=projects)
+
+def generate_enquiry_id():
+    last = Project.query.order_by(Project.id.desc()).first()
+    next_num = 1 if not last else last.id + 1
+    return f"VE/TN/2526/E{str(next_num).zfill(3)}"
