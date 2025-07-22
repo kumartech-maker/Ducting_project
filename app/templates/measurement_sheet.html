@@ -1,138 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Measurement Sheet</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     .form-section {
-      background: #f8f9fa;
-      padding: 20px;
+      background: #f4f4f4;
       border-radius: 10px;
+      padding: 20px;
     }
     .table-section {
       overflow-x: auto;
+      margin-top: 20px;
+    }
+    .preview-image {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+    }
+    .right-form input, .right-form select {
+      margin-bottom: 10px;
     }
     .table th, .table td {
+      vertical-align: middle;
       white-space: nowrap;
     }
   </style>
 </head>
 <body>
-<div class="container-fluid mt-4">
-  <div class="row">
-    <!-- Left: File Uploads and AutoCAD Viewer -->
-    <div class="col-md-4">
-      <div class="form-section">
-        <h5>Upload Drawings</h5>
-        <div class="mb-3">
-          <label class="form-label">Source Tag Drawing</label>
-          <input type="file" class="form-control" id="sourceDrawing">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Revision Drawing</label>
-          <input type="file" class="form-control" id="revisionDrawing">
-        </div>
-        <div class="mt-3">
-          <h6>Diagram Preview</h6>
-          <div class="border p-2" style="height: 300px; overflow: auto; background-color: #fff;">
-            <img id="diagramPreview" src="" class="img-fluid" alt="Diagram Preview">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: Duct Entry Form and Live Table -->
-    <div class="col-md-8">
-      <div class="form-section">
-        <h5>Duct Entry</h5>
-        <div class="row g-2 mb-3">
-          <div class="col"><input type="text" class="form-control" id="duct_no" placeholder="Duct No"></div>
-          <div class="col">
-            <select class="form-control" id="duct_type">
-              <option value="">Select Type</option>
-              <option>st</option><option>elb</option><option>red</option>
-              <option>dm</option><option>offset</option><option>shoe</option><option>vanes</option>
-            </select>
-          </div>
-          <div class="col"><input type="number" class="form-control" id="w1" placeholder="W1"></div>
-          <div class="col"><input type="number" class="form-control" id="h1" placeholder="H1"></div>
-          <div class="col"><input type="number" class="form-control" id="w2" placeholder="W2"></div>
-          <div class="col"><input type="number" class="form-control" id="h2" placeholder="H2"></div>
-        </div>
-        <div class="row g-2 mb-3">
-          <div class="col"><input type="number" class="form-control" id="length" placeholder="Length/Radius"></div>
-          <div class="col"><input type="number" class="form-control" id="degree" placeholder="Degree/Offset"></div>
-          <div class="col"><input type="number" class="form-control" id="quantity" placeholder="Quantity"></div>
-          <div class="col"><input type="number" class="form-control" id="factor" placeholder="Factor (optional)"></div>
-          <div class="col"><button class="btn btn-primary w-100" onclick="addEntry()">Add Entry</button></div>
+  <div class="container-fluid mt-4">
+    <div class="row">
+      
+      <!-- Left Side: File Uploads & Preview -->
+      <div class="col-md-4">
+        <div class="form-section">
+          <h5>Upload Drawings</h5>
+          <form enctype="multipart/form-data" method="POST" action="/upload-drawing">
+            <div class="mb-3">
+              <label for="sourceTag" class="form-label">Source Tag Drawing</label>
+              <input type="file" name="source_tag" id="sourceTag" class="form-control" accept="image/*,.dwg" />
+            </div>
+            <div class="mb-3">
+              <label for="revision" class="form-label">Revision Upload</label>
+              <input type="file" name="revision" id="revision" class="form-control" accept="image/*,.dwg" />
+            </div>
+            <div class="mb-3">
+              <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+          </form>
+          <img id="preview" class="preview-image" src="" alt="Preview will appear here" />
         </div>
       </div>
 
-      <div class="table-section mt-4">
-        <table class="table table-bordered" id="entryTable">
-          <thead class="table-light">
-            <tr>
-              <th>Duct No</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th>
-              <th>Length/Radius</th><th>Qty</th><th>Degree/Offset</th><th>Gauge</th>
-              <th>24g</th><th>22g</th><th>20g</th><th>18g</th>
-              <th>Area</th><th>Cleat</th><th>Nuts & Bolts</th><th>Gasket</th><th>Corner Pieces</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <div class="d-flex gap-2 mb-4">
-          <button class="btn btn-success">Submit</button>
-          <button class="btn btn-secondary">Export to PDF</button>
-          <button class="btn btn-info">Export to Excel</button>
-          <button class="btn btn-warning">Print</button>
+      <!-- Right Side: Form + Table -->
+      <div class="col-md-8">
+        <div class="form-section">
+          <h5>Add Duct Entry</h5>
+          <form id="ductForm" class="right-form" method="POST" action="/add-entry">
+            <div class="row">
+              <div class="col">
+                <input type="text" name="duct_no" class="form-control" placeholder="Duct No" required />
+              </div>
+              <div class="col">
+                <select name="duct_type" class="form-control" required>
+                  <option value="">Select Type</option>
+                  <option value="ST">ST</option>
+                  <option value="ELB">ELB</option>
+                  <option value="RED">RED</option>
+                  <option value="DUM">DUM</option>
+                  <option value="OFFSET">OFFSET</option>
+                  <option value="SHOE">SHOE</option>
+                  <option value="VANES">VANES</option>
+                </select>
+              </div>
+              <div class="col">
+                <input type="number" name="width1" class="form-control" placeholder="W1 (mm)" required />
+              </div>
+              <div class="col">
+                <input type="number" name="height1" class="form-control" placeholder="H1 (mm)" required />
+              </div>
+              <div class="col">
+                <input type="number" name="width2" class="form-control" placeholder="W2 (mm)" />
+              </div>
+              <div class="col">
+                <input type="number" name="height2" class="form-control" placeholder="H2 (mm)" />
+              </div>
+              <div class="col">
+                <input type="number" name="length" class="form-control" placeholder="Length/Radius (mm)" />
+              </div>
+              <div class="col">
+                <input type="number" name="degree" class="form-control" placeholder="Degree/Offset" />
+              </div>
+              <div class="col">
+                <input type="number" name="quantity" class="form-control" placeholder="Qty" required />
+              </div>
+              <div class="col">
+                <input type="number" step="0.01" name="factor" class="form-control" placeholder="Factor (optional)" />
+              </div>
+              <div class="col">
+                <button type="submit" class="btn btn-success">Add Entry</button>
+              </div>
+            </div>
+          </form>
         </div>
+
+        <!-- Live Table -->
+        <div class="table-section">
+          <table class="table table-bordered table-striped mt-4" id="liveTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Duct No</th>
+                <th>W1</th>
+                <th>H1</th>
+                <th>W2</th>
+                <th>H2</th>
+                <th>Length/Radius</th>
+                <th>Degree/Offset</th>
+                <th>Qty</th>
+                <th>Gauge</th>
+                <th>24g</th>
+                <th>22g</th>
+                <th>20g</th>
+                <th>18g</th>
+                <th>Cleat</th>
+                <th>Nuts & Bolts</th>
+                <th>Gasket</th>
+                <th>Corner</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Rows from backend will populate here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bottom Buttons -->
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <form method="POST" action="/submit-sheet">
+            <button class="btn btn-primary">Submit</button>
+          </form>
+          <form method="GET" action="/export/pdf">
+            <button class="btn btn-danger">Export PDF</button>
+          </form>
+          <form method="GET" action="/export/excel">
+            <button class="btn btn-success">Export Excel</button>
+          </form>
+          <form method="GET" action="/print-sheet" target="_blank">
+            <button class="btn btn-secondary">Print</button>
+          </form>
+        </div>
+
       </div>
     </div>
   </div>
-</div>
 
-<script>
-function addEntry() {
-  const ductNo = document.getElementById('duct_no').value;
-  const w1 = parseFloat(document.getElementById('w1').value);
-  const h1 = parseFloat(document.getElementById('h1').value);
-  const w2 = document.getElementById('w2').value;
-  const h2 = document.getElementById('h2').value;
-  const length = document.getElementById('length').value;
-  const degree = document.getElementById('degree').value;
-  const qty = parseInt(document.getElementById('quantity').value);
-  const type = document.getElementById('duct_type').value;
-
-  const area = ((w1 * h1 * qty) / 1000000).toFixed(2);
-  let gauge = '', g24 = '', g22 = '', g20 = '', g18 = '';
-  if (w1 <= 751 && h1 <= 751) {
-    gauge = '24g'; g24 = area;
-  } else if (w1 <= 1201 && h1 <= 1201) {
-    gauge = '22g'; g22 = area;
-  } else if (w1 <= 1800 && h1 <= 1800) {
-    gauge = '20g'; g20 = area;
-  } else {
-    gauge = '18g'; g18 = area;
-  }
-
-  const row = `<tr>
-    <td>${ductNo}</td><td>${w1}</td><td>${h1}</td><td>${w2}</td><td>${h2}</td>
-    <td>${length}</td><td>${qty}</td><td>${degree}</td><td>${gauge}</td>
-    <td>${g24}</td><td>${g22}</td><td>${g20}</td><td>${g18}</td>
-    <td>${area}</td><td></td><td></td><td></td><td></td>
-    <td><button class='btn btn-sm btn-warning'>Edit</button> <button class='btn btn-sm btn-danger'>Delete</button></td>
-  </tr>`;
-
-  document.querySelector('#entryTable tbody').insertAdjacentHTML('beforeend', row);
-  document.querySelectorAll('.form-control').forEach(el => el.value = '');
-}
-
-document.getElementById('sourceDrawing').addEventListener('change', function(evt) {
-  const file = evt.target.files[0];
-  if (file) document.getElementById('diagramPreview').src = URL.createObjectURL(file);
-});
-</script>
+  <script>
+    // Optional image preview
+    document.getElementById('sourceTag').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('preview').src = event.target.result;
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+  </script>
 </body>
 </html>
