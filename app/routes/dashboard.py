@@ -6,5 +6,8 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-
     return render_template('dashboard.html', role=session.get('role'))
+
+@dashboard_bp.route('/')
+def home():
+    return redirect(url_for('dashboard.dashboard'))
