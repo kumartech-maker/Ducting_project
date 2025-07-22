@@ -65,11 +65,14 @@ def new_project():
 # -------------------------------
 # Route: Seed Dummy Vendors (TEMP)
 # -------------------------------
+
+
+# ✅ Seed dummy vendors route
 @project_bp.route('/seed_vendors')
 def seed_vendors():
     if not Vendor.query.first():
-        v1 = Vendor(name="ABC Enterprises", gst="29ABCDE1234F2Z5", address="Chennai, TN")
-        v2 = Vendor(name="XYZ Solutions", gst="33XYZDE5678G1Z9", address="Coimbatore, TN")
+        v1 = Vendor(name="ABC Enterprises", gst_number="29ABCDE1234F2Z5", address="Chennai, TN")
+        v2 = Vendor(name="XYZ Solutions", gst_number="33XYZDE5678G1Z9", address="Coimbatore, TN")
         db.session.add_all([v1, v2])
         db.session.commit()
         return "Dummy vendors added"
