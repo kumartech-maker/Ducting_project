@@ -1,119 +1,160 @@
 from flask import Blueprint, request, jsonify
-import math
-from app.models import db, Measurement
+from models import db, Measurement
+from math import pi
 
 measurement_bp = Blueprint('measurement', __name__)
 
-def calculate_area(duct_type, w1, h1, w2, h2, length, degree, factor, quantity):
-    w1 = float(w1)
-    h1 = float(h1)
-    w2 = float(w2)
-    h2 = float(h2)
-    length = float(length)
-    factor = float(factor) if factor else 1
-    quantity = int(quantity)
+def calculate_measurement(data):
+    w1 = int(data.get('w1', 0))
+    h1 = int(data.get('h1', 0))
+    w2 = int(data.get('w2', 0))
+    h2 = int(data.get('h2', 0))
+    length = int(data.get('length', 0))
+    degree = float(data.get('degree') or 0)
+    qty = int(data.get('quantity', 1))
+    factor = float(data.get('factor') or 1)
+    duct_type = data.get('duct_type')
 
+    # ----------------------------
+    # Gauge Logic
+    # ----------------------------
+    max_side = max(w1, h1)
+    if max_side <= 750:
+        gauge = '24g'
+    elif max_side <= 1200:
+        gauge = '22g'
+    elif max_side <= 1800:
+        gauge = '20g'
+    else:
+        gauge = '18g'
+
+    # ----------------------------
+    # Area Calculation (m²)
+    # ----------------------------
     area = 0
-
     if duct_type == 'st':
-        area = 2 * (w1 + h1) * length / 1000000
-    elif duct_type == 'elb':
-        area = 1.57 * (w1 + h1) * length / 1000000
+        area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
     elif duct_type == 'red':
-        area = 2 * ((w1 + w2) / 2 + (h1 + h2) / 2) * length / 1000000
+        area = (w1 + h1 + w2 + h2) / 1000 * (length / 1000) * qty * factor
     elif duct_type == 'dm':
-        area = 2 * (w1 + h1) * length / 1000000
+        area = (w1 * h1) / 1000000 * qty
     elif duct_type == 'offset':
-        area = 2 * (w1 + h1) * length / 1000000
+        area = (w1 + h1 + w2 + h2) / 1000 * ((length + degree) / 1000) * qty * factor
     elif duct_type == 'shoe':
-        area = 2 * ((w1 + w2) / 2 + (h1 + h2) / 2) * length / 1000000
+        area = (w1 + h1) * 2 / 1000 * (length / 1000) * qty * factor
     elif duct_type == 'vanes':
-        area = 2 * (w1 + h1) * length / 1000000
-    else:
-        area = 0
+        area = (w1 / 1000) * (2 * pi * (w1 / 1000) / 4) * qty
+    elif duct_type == 'elb':
+        area = 2 * (w1 + h1) / 1000 * ((h1 / 2) / 1000 + (length / 1000) * pi * (degree / 180)) * qty * factor
 
-    area *= factor
-    total_area = round(area * quantity, 3)
-    return total_area
+    area = round(area, 3)
 
-def determine_gauge(w1, h1):
-    if 0 <= w1 <= 751 and 0 <= h1 <= 751:
-        return '24g'
-    elif 751 < w1 <= 1201 and 751 < h1 <= 1201:
-        return '22g'
-    elif 1201 < w1 <= 1800 and 1201 < h1 <= 1800:
-        return '20g'
-    elif w1 > 1800 and h1 > 1800:
-        return '18g'
-    else:
-        return '22g'  # default
-
-@measurement_bp.route('/calculate_measurement', methods=['POST'])
-def calculate_measurement():
-    data = request.json
-
-    duct_type = data['duct_type']
-    w1 = int(data['w1'])
-    h1 = int(data['h1'])
-    w2 = int(data['w2'])
-    h2 = int(data['h2'])
-    length = int(data['length'])
-    degree = data.get('degree', '')
-    quantity = int(data['quantity'])
-    factor = float(data['factor']) if data.get('factor') else 1.0
-
-    area = calculate_area(duct_type, w1, h1, w2, h2, length, degree, factor, quantity)
-    gauge = determine_gauge(w1, h1)
-
-    # Fill area under correct gauge
+    # ----------------------------
+    # Area Distribution by Gauge
+    # ----------------------------
     g24 = area if gauge == '24g' else 0
     g22 = area if gauge == '22g' else 0
     g20 = area if gauge == '20g' else 0
     g18 = area if gauge == '18g' else 0
 
-    # Additional material calculations
-    gasket = round((w1 + h1) * 2 * quantity / 1000, 3)
-    nuts_bolts = quantity * 4
-    cleat = round(((w1 + h1) * 2 * quantity) / 1000, 3)
-    corner = quantity * 4
+    # ----------------------------
+    # Material Calculation
+    # ----------------------------
+    cleat = int(area * 3)
+    nuts_bolts = int(area * 2)
+    gasket = round(area * 0.5, 2)
+    corner = int(area * 2)
 
-    return jsonify({
+    return {
         'gauge': gauge,
         'area': area,
         'g24': g24,
         'g22': g22,
         'g20': g20,
         'g18': g18,
-        'nuts_bolts': nuts_bolts,
         'cleat': cleat,
+        'nuts_bolts': nuts_bolts,
         'gasket': gasket,
         'corner': corner
-    })
+    }
 
-@measurement_bp.route('/submit_measurement', methods=['POST'])
-def submit_measurement():
+# ------------------------------------
+# Create New Measurement Entry
+# ------------------------------------
+@measurement_bp.route('/measurement', methods=['POST'])
+def create_measurement():
     data = request.json
+    calc = calculate_measurement(data)
 
     entry = Measurement(
-        duct_no=data['duct_no'],
-        duct_type=data['duct_type'],
-        w1=int(data['w1']),
-        h1=int(data['h1']),
-        w2=int(data['w2']),
-        h2=int(data['h2']),
-        length=int(data['length']),
-        degree=data.get('degree', ''),
-        quantity=int(data['quantity']),
-        factor=float(data.get('factor') or 1.0),
-        gauge=data['gauge'],
-        area=float(data['area']),
-        g24=float(data['g24']),
-        g22=float(data['g22']),
-        g20=float(data['g20']),
-        g18=float(data['g18']),
-    )
+        duct_no=data.get('duct_no'),
+        duct_type=data.get('duct_type'),
+        w1=data.get('w1'),
+        h1=data.get('h1'),
+        w2=data.get('w2'),
+        h2=data.get('h2'),
+        length=data.get('length'),
+        degree=data.get('degree'),
+        quantity=data.get('quantity'),
+        factor=data.get('factor') or 1,
 
+        gauge=calc['gauge'],
+        area=calc['area'],
+        g24=calc['g24'],
+        g22=calc['g22'],
+        g20=calc['g20'],
+        g18=calc['g18'],
+        cleat=calc['cleat'],
+        nuts_bolts=calc['nuts_bolts'],
+        gasket=calc['gasket'],
+        corner=calc['corner']
+    )
     db.session.add(entry)
     db.session.commit()
 
-    return jsonify({'success': True})
+    return jsonify({'message': 'Measurement added successfully'}), 201
+
+# ------------------------------------
+# Get All Entries
+# ------------------------------------
+@measurement_bp.route('/measurement', methods=['GET'])
+def get_all_measurements():
+    measurements = Measurement.query.all()
+    result = []
+    for m in measurements:
+        result.append({
+            'id': m.id,
+            'duct_no': m.duct_no,
+            'duct_type': m.duct_type,
+            'w1': m.w1,
+            'h1': m.h1,
+            'w2': m.w2,
+            'h2': m.h2,
+            'length': m.length,
+            'degree': m.degree,
+            'quantity': m.quantity,
+            'factor': m.factor,
+            'gauge': m.gauge,
+            'area': m.area,
+            'g24': m.g24,
+            'g22': m.g22,
+            'g20': m.g20,
+            'g18': m.g18,
+            'cleat': m.cleat,
+            'nuts_bolts': m.nuts_bolts,
+            'gasket': m.gasket,
+            'corner': m.corner
+        })
+    return jsonify(result)
+
+# ------------------------------------
+# Delete Entry
+# ------------------------------------
+@measurement_bp.route('/measurement/<int:id>', methods=['DELETE'])
+def delete_measurement(id):
+    entry = Measurement.query.get(id)
+    if entry:
+        db.session.delete(entry)
+        db.session.commit()
+        return jsonify({'message': 'Deleted successfully'})
+    return jsonify({'message': 'Entry not found'}), 404
