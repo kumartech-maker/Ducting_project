@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from models import db, Measurement
 import math
 from app.models import db, Measurement
 
