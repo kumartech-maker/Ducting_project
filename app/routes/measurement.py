@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import db, Measurement
 import math
+from models import db, Measurement
 
 measurement_bp = Blueprint('measurement', __name__)
 
